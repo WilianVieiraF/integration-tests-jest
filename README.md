@@ -17,7 +17,7 @@
 
 ### Prerequisites:
  - NodeJS `v22`
-.
+
 ### How to run?
 
 Inside of the project folder run:
