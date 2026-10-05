@@ -17,9 +17,5 @@ module.exports = {
         openReport: false
       }
     ]
-  ],
-  collectCoverage: true,
-  coverageDirectory: 'coverage',
-  coverageReporters: ['lcov', 'text-summary'],
-  collectCoverageFrom: ['simple-reporter.ts']
+  ]
 };
