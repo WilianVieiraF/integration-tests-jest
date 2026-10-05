@@ -60,7 +60,7 @@ describe('Restful-Booker API', () => {
   describe('Autenticação', () => {
     it('Login com credenciais inválidas', async () => {
       // A Restful-Booker retorna 200 com a mensagem "Bad credentials"
-      await p
+      const response = await p
         .spec()
         .post(`${baseUrl}/auth`)
         .withJson({
@@ -69,6 +69,9 @@ describe('Restful-Booker API', () => {
         })
         .expectStatus(StatusCodes.OK)
         .expectJson({ reason: 'Bad credentials' });
+
+      expect(response.statusCode).toBe(StatusCodes.OK);
+      expect(response.body.reason).toBe('Bad credentials');
     });
   });
 
@@ -95,21 +98,25 @@ describe('Restful-Booker API', () => {
           }
         })
         .returns('bookingid');
+
+      expect(bookingId).toBeDefined();
     });
 
     it('Cadastrar reserva com payload inválido', async () => {
       // Sem os campos obrigatórios a API retorna erro de servidor (500)
-      await p
+      const response = await p
         .spec()
         .post(`${baseUrl}/booking`)
         .withJson({
           firstname: faker.person.firstName()
         })
         .expectStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+
+      expect(response.statusCode).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
     });
 
     it('Buscar a reserva cadastrada', async () => {
-      await p
+      const response = await p
         .spec()
         .get(`${baseUrl}/booking/${bookingId}`)
         .expectStatus(StatusCodes.OK)
@@ -119,27 +126,34 @@ describe('Restful-Booker API', () => {
           totalprice: reserva.totalprice,
           depositpaid: true
         });
+
+      expect(response.statusCode).toBe(StatusCodes.OK);
+      expect(response.body.firstname).toBe(reserva.firstname);
     });
 
     it('Buscar reserva com id inexistente', async () => {
-      await p
+      const response = await p
         .spec()
         .get(`${baseUrl}/booking/0`)
         .expectStatus(StatusCodes.NOT_FOUND);
+
+      expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
     });
 
     it('Editar reserva sem token', async () => {
-      await p
+      const response = await p
         .spec()
         .put(`${baseUrl}/booking/${bookingId}`)
         .withJson(gerarReserva())
         .expectStatus(StatusCodes.FORBIDDEN);
+
+      expect(response.statusCode).toBe(StatusCodes.FORBIDDEN);
     });
 
     it('Editar reserva completa (PUT)', async () => {
       const reservaEditada = gerarReserva();
 
-      await p
+      const response = await p
         .spec()
         .put(`${baseUrl}/booking/${bookingId}`)
         .withHeaders('Cookie', `token=${token}`)
@@ -150,12 +164,15 @@ describe('Restful-Booker API', () => {
           lastname: reservaEditada.lastname,
           totalprice: reservaEditada.totalprice
         });
+
+      expect(response.statusCode).toBe(StatusCodes.OK);
+      expect(response.body.firstname).toBe(reservaEditada.firstname);
     });
 
     it('Editar reserva parcialmente (PATCH)', async () => {
       const novoNome = faker.person.firstName();
 
-      await p
+      const response = await p
         .spec()
         .patch(`${baseUrl}/booking/${bookingId}`)
         .withHeaders('Cookie', `token=${token}`)
@@ -168,29 +185,38 @@ describe('Restful-Booker API', () => {
           firstname: novoNome,
           totalprice: 999
         });
+
+      expect(response.statusCode).toBe(StatusCodes.OK);
+      expect(response.body.totalprice).toBe(999);
     });
 
     it('Excluir reserva sem token', async () => {
-      await p
+      const response = await p
         .spec()
         .delete(`${baseUrl}/booking/${bookingId}`)
         .expectStatus(StatusCodes.FORBIDDEN);
+
+      expect(response.statusCode).toBe(StatusCodes.FORBIDDEN);
     });
 
     it('Excluir reserva', async () => {
       // A Restful-Booker retorna 201 no DELETE bem-sucedido
-      await p
+      const response = await p
         .spec()
         .delete(`${baseUrl}/booking/${bookingId}`)
         .withHeaders('Cookie', `token=${token}`)
         .expectStatus(StatusCodes.CREATED);
+
+      expect(response.statusCode).toBe(StatusCodes.CREATED);
     });
 
     it('Buscar reserva após a exclusão', async () => {
-      await p
+      const response = await p
         .spec()
         .get(`${baseUrl}/booking/${bookingId}`)
         .expectStatus(StatusCodes.NOT_FOUND);
+
+      expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
     });
   });
 });
